@@ -33,7 +33,7 @@ func getBookById(c *gin.Context) {
 
 	if err != nil {
 		text := fmt.Sprintf("Book with id %s not found", id)
-		c.JSON(http.StatusNotFound, gin.H{"error": text})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": text})
 		return
 	}
 
@@ -63,12 +63,12 @@ func createBook(c *gin.Context) {
 
 	for _, book := range books {
 		if book.ID == newBook.ID {
-			c.JSON(http.StatusConflict, gin.H{"error": "Id already exists"})
+			c.IndentedJSON(http.StatusConflict, gin.H{"error": "Id already exists"})
 			return
 		}
 
 		if book.Title == newBook.Title && book.Author == newBook.Author {
-			c.JSON(http.StatusConflict, gin.H{"error": "Title from this Author already exists"})
+			c.IndentedJSON(http.StatusConflict, gin.H{"error": "Title from this Author already exists"})
 			return
 		}
 	}
