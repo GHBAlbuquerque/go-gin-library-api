@@ -78,4 +78,4 @@ curl -X PATCH "http://localhost:8080/return?id=1"
 
 ---
 
-> Made with ☕, ❤️, and curiosity — by [your name here] 🌸
+> Made with ☕, ❤️, and curiosity — by @GHBAlbuquerque 🌸
