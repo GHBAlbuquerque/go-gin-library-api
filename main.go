@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +24,31 @@ var books = []book{
 /*getBooks returns the json version of my book slice*/
 func getBooks(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, books)
+}
+
+/*getBookById returns the json version of desired book */
+func getBookById(c *gin.Context) {
+	id := c.Param("id")
+	book, err := findBookById(id)
+
+	if err != nil {
+		text := fmt.Sprintf("Book with id %s not found", id)
+		c.JSON(http.StatusNotFound, gin.H{"error": text})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, book)
+}
+
+/*aux method*/
+func findBookById(id string) (*book, error) {
+	for i, b := range books {
+		if b.ID == id {
+			return &books[i], nil
+		}
+	}
+
+	return nil, errors.New("book not found")
 }
 
 /*createBook creates a book and the json version of my book slice*/
@@ -54,6 +81,7 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/books", getBooks)
+	router.GET("/books/:id", getBookById)
 	router.POST("/books", createBook)
 
 	router.Run("localhost:8080")
