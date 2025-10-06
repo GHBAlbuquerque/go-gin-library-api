@@ -104,6 +104,27 @@ func checkoutBook(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
+/*returnBook retrieves an available book from the library*/
+func returnBook(c *gin.Context) {
+	id, ok := c.GetQuery("id")
+
+	if !ok {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "No id sent"})
+		return
+	}
+
+	book, err := findBookById(id)
+
+	if err != nil {
+		text := fmt.Sprintf("Book with id %s not found", id)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": text})
+		return
+	}
+
+	book.Quantity += 1
+	c.IndentedJSON(http.StatusOK, book)
+}
+
 func main() {
 	router := gin.Default()
 
@@ -111,6 +132,7 @@ func main() {
 	router.GET("/books/:id", getBookById)
 	router.POST("/books", createBook)
 	router.PATCH("/checkout", checkoutBook)
+	router.PATCH("/return", returnBook)
 
 	router.Run("localhost:8080")
 
