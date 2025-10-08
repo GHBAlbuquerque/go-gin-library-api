@@ -15,5 +15,6 @@ type Store interface {
 	Get(ctx context.Context, id string) (Book, error)
 	Create(ctx context.Context, b Book) (string, error)
 	Update(ctx context.Context, b Book) error
-	FindByTitleAuthor(ctx context.Context)
+	FindByTitle(ctx context.Context) ([]Book, error)
+	FindByAuthor(ctx context.Context) ([]Book, error)
 }
