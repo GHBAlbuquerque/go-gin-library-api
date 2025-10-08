@@ -2,14 +2,14 @@ package main
 
 import (
 	"errors"
-	"example/go-gin-library-api/internal/models"
+	"example/go-gin-library-api/internal/book"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-var books = []models.Book{
+var books = []book.Book{
 	{ID: "1", Title: "In Search of Lost Time", Author: "Marcel Proust", Quantity: 2},
 	{ID: "2", Title: "The Great Gatsby", Author: "F. Scott Fitzgerald", Quantity: 5},
 	{ID: "3", Title: "War and Peace", Author: "Leo Tolstoy", Quantity: 6},
@@ -35,7 +35,7 @@ func getBookById(c *gin.Context) {
 }
 
 /*aux method*/
-func findBookById(id string) (*models.Book, error) {
+func findBookById(id string) (*book.Book, error) {
 	for i, b := range books {
 		if b.ID == id {
 			return &books[i], nil
@@ -47,7 +47,7 @@ func findBookById(id string) (*models.Book, error) {
 
 /*createBook creates a book and the json version of my book slice*/
 func createBook(c *gin.Context) {
-	var newBook models.Book
+	var newBook book.Book
 
 	err := c.BindJSON(&newBook)
 

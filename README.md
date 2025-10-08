@@ -7,7 +7,7 @@ A tiny RESTful API built with [Gin](https://github.com/gin-gonic/gin) to manage 
 ## 🚀 How to run
 
 ```bash
-go run main.go
+go run cmd/booksrv/main.go
 ```
 
 The server will start at:
