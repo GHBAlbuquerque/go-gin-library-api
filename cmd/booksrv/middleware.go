@@ -1,1 +1,1 @@
-package booksrv
+package main
