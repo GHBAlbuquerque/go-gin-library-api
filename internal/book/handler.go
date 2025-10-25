@@ -8,19 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var books = []Book{
-	{ID: "1", Title: "In Search of Lost Time", Author: "Marcel Proust", Quantity: 2},
-	{ID: "2", Title: "The Great Gatsby", Author: "F. Scott Fitzgerald", Quantity: 5},
-	{ID: "3", Title: "War and Peace", Author: "Leo Tolstoy", Quantity: 6},
+type BookHandler struct {
+	store Store // its illegal to use pointers to interface types
+}
+
+func NewHandler(store Store) *BookHandler {
+	h := BookHandler{
+		store: store,
+	}
+
+	return &h
 }
 
 /*getBooks returns the json version of my book slice*/
-func FindAll(c *gin.Context) {
+func (h *BookHandler) FindAll(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, books)
 }
 
 /*getBookById returns the json version of desired book */
-func GetById(c *gin.Context) {
+func (h *BookHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
 	book, err := FindbyId(id)
 
@@ -34,7 +40,7 @@ func GetById(c *gin.Context) {
 }
 
 /*aux method*/
-func FindbyId(id string) (*Book, error) {
+func (h *BookHandler) FindbyId(id string) (*Book, error) {
 	for i, b := range books {
 		if b.ID == id {
 			return &books[i], nil
@@ -45,7 +51,7 @@ func FindbyId(id string) (*Book, error) {
 }
 
 /*createBook creates a book and the json version of my book slice*/
-func Create(c *gin.Context) {
+func (h *BookHandler) Create(c *gin.Context) {
 	var newBook Book
 
 	err := c.BindJSON(&newBook)
@@ -71,7 +77,7 @@ func Create(c *gin.Context) {
 }
 
 /*checkoutBook retrieves an available book from the library*/
-func Checkout(c *gin.Context) {
+func (h *BookHandler) Checkout(c *gin.Context) {
 	id, ok := c.GetQuery("id")
 
 	if !ok {
@@ -98,7 +104,7 @@ func Checkout(c *gin.Context) {
 }
 
 /*returnBook retrieves an available book from the library*/
-func Return(c *gin.Context) {
+func (h *BookHandler) Return(c *gin.Context) {
 	id, ok := c.GetQuery("id")
 
 	if !ok {
