@@ -9,7 +9,7 @@ import (
 
 // Fastest way to get going, stores items on a map. Thread-safe with a RWMutex.
 type Memory struct {
-	mu    sync.RWMutex
+	mu    sync.RWMutex         // embedding a value of type sync.RWMutex, not a pointer. That type is ready to use in its zero value.
 	items map[string]book.Book // key is the book id
 }
 

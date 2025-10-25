@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -114,9 +115,89 @@ func loadFromFile(path string, j *JSON) error {
 	return nil
 }
 
-func (j *JSON) List(ctx context.Context) ([]book.Book, error)           { /*TODO*/ }
-func (j *JSON) Get(ctx context.Context, id string) (book.Book, error)   { /*TODO*/ }
-func (j *JSON) Create(ctx context.Context, b book.Book) (string, error) { /*TODO*/ }
-func (j *JSON) Update(ctx context.Context, b book.Book) error           { /*TODO*/ }
-func (j *JSON) FindByTitle(ctx context.Context) ([]book.Book, error)    { /*TODO*/ }
-func (j *JSON) FindByAuthor(ctx context.Context) ([]book.Book, error)   { /*TODO*/ }
+// List offers thread-safe reading for all the current in-memory stored books. Returns a slice of books.
+func (j *JSON) List(ctx context.Context) []book.Book {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	out := make([]book.Book, 0, len(j.data))
+	for _, b := range j.data {
+		out = append(out, b)
+	}
+
+	return out
+}
+
+func (j *JSON) Get(ctx context.Context, id string) (book.Book, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	b, exists := j.data[id]
+
+	if !exists {
+		return book.Book{}, book.ErrNotFound
+	}
+
+	return b, nil
+}
+
+func (j *JSON) Create(ctx context.Context, b book.Book) (string, error) {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	if _, exists := j.data[b.ID]; exists {
+		return b.ID, book.ErrDuplicate
+	}
+
+	for _, current := range j.data {
+		if strings.EqualFold(current.Title, b.Title) && strings.EqualFold(current.Author, b.Author) {
+			return b.ID, book.ErrDuplicate
+		}
+	}
+
+	j.data[b.ID] = b
+	return b.ID, j.persist()
+}
+
+func (j *JSON) Update(ctx context.Context, b book.Book) error {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	_, exists := j.data[b.ID]
+	if !exists {
+		return book.ErrNotFound
+	}
+
+	j.data[b.ID] = b
+	return j.persist()
+}
+
+func (j *JSON) FindByTitle(ctx context.Context, title string) []book.Book {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	var out = make([]book.Book, 0, len(j.data))
+
+	for _, current := range j.data {
+		if strings.EqualFold(current.Title, title) {
+			out = append(out, current)
+		}
+	}
+
+	return out
+}
+
+func (j *JSON) FindByAuthor(ctx context.Context, author string) []book.Book {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+
+	var out = make([]book.Book, 0, len(j.data))
+
+	for _, current := range j.data {
+		if strings.EqualFold(current.Author, author) {
+			out = append(out, current)
+		}
+	}
+
+	return out
+}
