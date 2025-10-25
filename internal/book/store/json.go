@@ -77,7 +77,24 @@ func ensureFileWithSeed(path string, seed []book.Book, j *JSON) (bool, error) {
 		return false, err
 	}
 
-	return true, nil
+	// no file created, data is not yest inside j.data
+	return false, nil
+}
+
+// persist writes the file atomically if it doesn't exist on the path
+func (j *JSON) persist() error {
+	tmp := j.path + ".tmp"
+
+	bytes, err := json.MarshalIndent(j.data, "", " ")
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(tmp, bytes, 0o644); err != nil {
+		return err
+	}
+
+	return os.Rename(tmp, j.path)
 }
 
 // loadFromFile reads the Json file from path and unmarshalls the content to the data map on JSON struct
@@ -95,22 +112,6 @@ func loadFromFile(path string, j *JSON) error {
 	}
 
 	return nil
-}
-
-// persist writes the file atomically if it doesn't exist on the path
-func (j *JSON) persist() error {
-	tmp := j.path + ".tmp"
-
-	bytes, err := json.MarshalIndent(j.data, "", "")
-	if err != nil {
-		return err
-	}
-
-	if err := os.WriteFile(tmp, bytes, 0o644); err != nil {
-		return err
-	}
-
-	return os.Rename(tmp, j.path)
 }
 
 func (j *JSON) List(ctx context.Context) ([]book.Book, error)           { /*TODO*/ }
