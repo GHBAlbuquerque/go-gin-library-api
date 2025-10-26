@@ -21,7 +21,12 @@ func NewHandler(store Store) *BookHandler {
 
 /*FindAll returns the json version of my book slice*/
 func (h *BookHandler) FindAll(c *gin.Context) {
-	out := h.store.List(c)
+	out, err := h.store.List(c)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, out)
 }
 

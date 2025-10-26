@@ -116,7 +116,7 @@ func loadFromFile(path string, j *JSON) error {
 }
 
 // List offers thread-safe reading for all the current in-memory stored books. Returns a slice of books.
-func (j *JSON) List(ctx context.Context) []book.Book {
+func (j *JSON) List(ctx context.Context) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
@@ -125,7 +125,7 @@ func (j *JSON) List(ctx context.Context) []book.Book {
 		out = append(out, b)
 	}
 
-	return out
+	return out, nil
 }
 
 // FindById offers thread-safe read of a book by its id.
@@ -176,7 +176,7 @@ func (j *JSON) Update(ctx context.Context, b book.Book) error {
 }
 
 // FindByTitle returns a slice of books found by a title
-func (j *JSON) FindByTitle(ctx context.Context, title string) []book.Book {
+func (j *JSON) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
@@ -188,11 +188,11 @@ func (j *JSON) FindByTitle(ctx context.Context, title string) []book.Book {
 		}
 	}
 
-	return out
+	return out, nil
 }
 
 // FindByAuthor returns a slice of books found by an author
-func (j *JSON) FindByAuthor(ctx context.Context, author string) []book.Book {
+func (j *JSON) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
@@ -204,5 +204,5 @@ func (j *JSON) FindByAuthor(ctx context.Context, author string) []book.Book {
 		}
 	}
 
-	return out
+	return out, nil
 }

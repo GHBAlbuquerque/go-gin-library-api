@@ -26,7 +26,7 @@ func NewMemory(seed []book.Book) (*Memory, error) {
 
 // (m *Memory) is my receiver, which can be used to call these functions
 // List offers thread-safe reading for all the current in-memory stored books. Returns a slice of books.
-func (m *Memory) List(ctx context.Context) []book.Book {
+func (m *Memory) List(ctx context.Context) ([]book.Book, error) {
 	m.mu.RLock()         //locks for writes, but keep reads going
 	defer m.mu.RUnlock() // defer runs the code when the concurrent function return (no matter the result)
 
@@ -35,7 +35,7 @@ func (m *Memory) List(ctx context.Context) []book.Book {
 		out = append(out, b)
 	}
 
-	return out
+	return out, nil
 }
 
 // FindById offers thread-safe read of a book by its id.
@@ -84,7 +84,7 @@ func (m *Memory) Update(ctx context.Context, b book.Book) error {
 }
 
 // FindByTitle returns a slice of books found by a title
-func (m *Memory) FindByTitle(ctx context.Context, title string) []book.Book {
+func (m *Memory) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -96,11 +96,11 @@ func (m *Memory) FindByTitle(ctx context.Context, title string) []book.Book {
 		}
 	}
 
-	return out
+	return out, nil
 }
 
 // FindByAuthor returns a slice of books found by an author
-func (m *Memory) FindByAuthor(ctx context.Context, author string) []book.Book {
+func (m *Memory) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -112,5 +112,5 @@ func (m *Memory) FindByAuthor(ctx context.Context, author string) []book.Book {
 		}
 	}
 
-	return out
+	return out, nil
 }
