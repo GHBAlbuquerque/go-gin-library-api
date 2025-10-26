@@ -128,7 +128,7 @@ func (j *JSON) List(ctx context.Context) []book.Book {
 	return out
 }
 
-func (j *JSON) Get(ctx context.Context, id string) (book.Book, error) {
+func (j *JSON) FindById(ctx context.Context, id string) (book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 

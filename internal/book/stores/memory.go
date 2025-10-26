@@ -14,18 +14,17 @@ type Memory struct {
 }
 
 // NewMemory creates a MemoryStore
-func NewMemory(seed []book.Book) *Memory {
+func NewMemory(seed []book.Book) (*Memory, error) {
 	m := &Memory{items: make(map[string]book.Book, len(seed))}
 
 	for _, b := range seed {
 		m.items[b.ID] = b
 	}
 
-	return m
+	return m, nil
 }
 
 // (m *Memory) is my receiver, which can be used to call these functions
-
 // List offers thread-safe reading for all the current in-memory stored books. Returns a slice of books.
 func (m *Memory) List(ctx context.Context) []book.Book {
 	m.mu.RLock()         //locks for writes, but keep reads going
@@ -40,7 +39,7 @@ func (m *Memory) List(ctx context.Context) []book.Book {
 }
 
 // Get offers thread-safe read of a book by its id.
-func (m *Memory) Get(ctx context.Context, id string) (book.Book, error) {
+func (m *Memory) FindById(ctx context.Context, id string) (book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 

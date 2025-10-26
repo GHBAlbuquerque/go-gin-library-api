@@ -1,7 +1,6 @@
 package book
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,7 +8,7 @@ import (
 )
 
 type BookHandler struct {
-	store Store // its illegal to use pointers to interface types
+	store Store // it's illegal to use pointers to interface types
 }
 
 func NewHandler(store Store) *BookHandler {
@@ -22,13 +21,14 @@ func NewHandler(store Store) *BookHandler {
 
 /*getBooks returns the json version of my book slice*/
 func (h *BookHandler) FindAll(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, books)
+	out := h.store.List(c)
+	c.IndentedJSON(http.StatusOK, out)
 }
 
 /*getBookById returns the json version of desired book */
 func (h *BookHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
-	book, err := FindbyId(id)
+	book, err := h.store.FindById(c, id)
 
 	if err != nil {
 		text := fmt.Sprintf("Book with id %s not found", id)
@@ -39,41 +39,24 @@ func (h *BookHandler) GetById(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
-/*aux method*/
-func (h *BookHandler) FindbyId(id string) (*Book, error) {
-	for i, b := range books {
-		if b.ID == id {
-			return &books[i], nil
-		}
-	}
-
-	return nil, errors.New("book not found")
-}
-
 /*createBook creates a book and the json version of my book slice*/
 func (h *BookHandler) Create(c *gin.Context) {
 	var newBook Book
 
-	err := c.BindJSON(&newBook)
-
-	if err != nil {
+	if err := c.BindJSON(&newBook); err != nil {
+		text := fmt.Sprintf("BindJSON: %s", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
 		return
 	}
 
-	for _, book := range books {
-		if book.ID == newBook.ID {
-			c.IndentedJSON(http.StatusConflict, gin.H{"error": "Id already exists"})
-			return
-		}
-
-		if book.Title == newBook.Title && book.Author == newBook.Author {
-			c.IndentedJSON(http.StatusConflict, gin.H{"error": "Title from this Author already exists"})
-			return
-		}
+	out, err := h.store.Create(c, newBook)
+	if err != nil {
+		text := fmt.Sprintf("Create: %s", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
+		return
 	}
 
-	books = append(books, newBook)
-	c.IndentedJSON(http.StatusCreated, newBook)
+	c.IndentedJSON(http.StatusCreated, out)
 }
 
 /*checkoutBook retrieves an available book from the library*/
@@ -85,7 +68,7 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 		return
 	}
 
-	book, err := FindbyId(id)
+	book, err := h.store.FindById(c, id)
 
 	if err != nil {
 		text := fmt.Sprintf("Book with id %s not found", id)
@@ -99,7 +82,7 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 		return
 	}
 
-	book.Quantity -= 1
+	book.Quantity -= 1 //TODO
 	c.IndentedJSON(http.StatusOK, book)
 }
 
@@ -112,7 +95,7 @@ func (h *BookHandler) Return(c *gin.Context) {
 		return
 	}
 
-	book, err := FindbyId(id)
+	book, err := h.store.FindById(c, id)
 
 	if err != nil {
 		text := fmt.Sprintf("Book with id %s not found", id)
@@ -120,6 +103,6 @@ func (h *BookHandler) Return(c *gin.Context) {
 		return
 	}
 
-	book.Quantity += 1
+	book.Quantity += 1 //TODO
 	c.IndentedJSON(http.StatusOK, book)
 }

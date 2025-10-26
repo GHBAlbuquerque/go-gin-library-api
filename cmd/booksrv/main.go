@@ -15,7 +15,8 @@ var books = []book.Book{
 
 func main() {
 	router := gin.Default()
-	h := book.NewHandler(stores.NewMemory(books))
+	s, _ := stores.NewMemory(books) //TODO: create a method that based on env var creates the desired store
+	h := book.NewHandler(s)
 
 	router.GET("/books", h.FindAll)
 	router.GET("/books/:id", h.GetById)
