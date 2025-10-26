@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	ErrNotFound  = fmt.Errorf("not found")
-	ErrDuplicate = fmt.Errorf("duplicate")
+	ErrNotFound  = fmt.Errorf("Book not found")
+	ErrDuplicate = fmt.Errorf("Book already exists")
 )
 
 type Store interface {

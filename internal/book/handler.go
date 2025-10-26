@@ -31,8 +31,7 @@ func (h *BookHandler) GetById(c *gin.Context) {
 	book, err := h.store.FindById(c, id)
 
 	if err != nil {
-		text := fmt.Sprintf("Book with id %s not found", id)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": text})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -44,14 +43,14 @@ func (h *BookHandler) Create(c *gin.Context) {
 	var newBook Book
 
 	if err := c.BindJSON(&newBook); err != nil {
-		text := fmt.Sprintf("BindJSON: %s", err)
+		text := fmt.Sprintf("BindJSON: %s", err.Error())
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
 		return
 	}
 
 	out, err := h.store.Create(c, newBook)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.IndentedJSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -70,8 +69,7 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 	book, err := h.store.FindById(c, id)
 
 	if err != nil {
-		text := fmt.Sprintf("Book with id %s not found", id)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": text})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -83,7 +81,7 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 
 	book.Quantity -= 1
 	if err := h.store.Update(c, book); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -102,14 +100,13 @@ func (h *BookHandler) Return(c *gin.Context) {
 	book, err := h.store.FindById(c, id)
 
 	if err != nil {
-		text := fmt.Sprintf("Book with id %s not found", id)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": text})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	book.Quantity += 1
 	if err := h.store.Update(c, book); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
