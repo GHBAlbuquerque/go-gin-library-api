@@ -16,7 +16,7 @@ var books = []book.Book{
 
 func main() {
 	router := gin.Default()
-	s, err := stores.NewJSON("data/books.json", books) //TODO: create a method that based on env var creates the desired store
+	s, err := stores.NewSQLite() //TODO: create a method that based on env var creates the desired store
 	if err != nil {
 		log.Fatal(err.Error())
 		return
