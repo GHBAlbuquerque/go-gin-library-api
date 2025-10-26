@@ -15,7 +15,7 @@ var books = []book.Book{
 
 func main() {
 	router := gin.Default()
-	s, _ := stores.NewMemory(books) //TODO: create a method that based on env var creates the desired store
+	s, _ := stores.NewJSON("/seeds", books) //TODO: create a method that based on env var creates the desired store
 	h := book.NewHandler(s)
 
 	router.GET("/books", h.FindAll)

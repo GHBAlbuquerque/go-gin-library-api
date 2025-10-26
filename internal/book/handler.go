@@ -19,13 +19,13 @@ func NewHandler(store Store) *BookHandler {
 	return &h
 }
 
-/*getBooks returns the json version of my book slice*/
+/*FindAll returns the json version of my book slice*/
 func (h *BookHandler) FindAll(c *gin.Context) {
 	out := h.store.List(c)
 	c.IndentedJSON(http.StatusOK, out)
 }
 
-/*getBookById returns the json version of desired book */
+/*GetById returns the json version of desired book */
 func (h *BookHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
 	book, err := h.store.FindById(c, id)
@@ -39,7 +39,7 @@ func (h *BookHandler) GetById(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
-/*createBook creates a book and the json version of my book slice*/
+/*Create creates a book and the json version of my book slice*/
 func (h *BookHandler) Create(c *gin.Context) {
 	var newBook Book
 
@@ -58,7 +58,7 @@ func (h *BookHandler) Create(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, out)
 }
 
-/*checkoutBook retrieves an available book from the library*/
+/*Checkout retrieves an available book from the library*/
 func (h *BookHandler) Checkout(c *gin.Context) {
 	id, ok := c.GetQuery("id")
 
@@ -90,7 +90,7 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
-/*returnBook retrieves an available book from the library*/
+/*Return retrieves an available book from the library*/
 func (h *BookHandler) Return(c *gin.Context) {
 	id, ok := c.GetQuery("id")
 
