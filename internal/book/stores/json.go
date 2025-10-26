@@ -128,6 +128,7 @@ func (j *JSON) List(ctx context.Context) []book.Book {
 	return out
 }
 
+// FindById offers thread-safe read of a book by its id.
 func (j *JSON) FindById(ctx context.Context, id string) (book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
@@ -141,6 +142,7 @@ func (j *JSON) FindById(ctx context.Context, id string) (book.Book, error) {
 	return b, nil
 }
 
+// Create offers thread-safe writing in memory.
 func (j *JSON) Create(ctx context.Context, b book.Book) (string, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
@@ -159,6 +161,7 @@ func (j *JSON) Create(ctx context.Context, b book.Book) (string, error) {
 	return b.ID, j.persist()
 }
 
+// Update offers thread-safe writing in memory for an existing book (found by ID).
 func (j *JSON) Update(ctx context.Context, b book.Book) error {
 	j.mu.Lock()
 	defer j.mu.Unlock()
@@ -172,6 +175,7 @@ func (j *JSON) Update(ctx context.Context, b book.Book) error {
 	return j.persist()
 }
 
+// FindByTitle returns a slice of books found by a title
 func (j *JSON) FindByTitle(ctx context.Context, title string) []book.Book {
 	j.mu.Lock()
 	defer j.mu.Unlock()
@@ -187,6 +191,7 @@ func (j *JSON) FindByTitle(ctx context.Context, title string) []book.Book {
 	return out
 }
 
+// FindByAuthor returns a slice of books found by an author
 func (j *JSON) FindByAuthor(ctx context.Context, author string) []book.Book {
 	j.mu.Lock()
 	defer j.mu.Unlock()

@@ -82,7 +82,8 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 		return
 	}
 
-	book.Quantity -= 1 //TODO
+	book.Quantity -= 1
+	h.store.Update(c, book)
 	c.IndentedJSON(http.StatusOK, book)
 }
 
@@ -103,6 +104,7 @@ func (h *BookHandler) Return(c *gin.Context) {
 		return
 	}
 
-	book.Quantity += 1 //TODO
+	book.Quantity += 1
+	h.store.Update(c, book)
 	c.IndentedJSON(http.StatusOK, book)
 }

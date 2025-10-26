@@ -38,7 +38,7 @@ func (m *Memory) List(ctx context.Context) []book.Book {
 	return out
 }
 
-// Get offers thread-safe read of a book by its id.
+// FindById offers thread-safe read of a book by its id.
 func (m *Memory) FindById(ctx context.Context, id string) (book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
