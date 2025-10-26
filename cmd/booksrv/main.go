@@ -3,6 +3,7 @@ package main
 import (
 	"example/go-gin-library-api/internal/book"
 	"example/go-gin-library-api/internal/book/stores"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,12 @@ var books = []book.Book{
 
 func main() {
 	router := gin.Default()
-	s, _ := stores.NewJSON("/seeds", books) //TODO: create a method that based on env var creates the desired store
+	s, err := stores.NewJSON("data/books.json", books) //TODO: create a method that based on env var creates the desired store
+	if err != nil {
+		log.Fatal(err.Error())
+		return
+	}
+
 	h := book.NewHandler(s)
 
 	router.GET("/books", h.FindAll)
