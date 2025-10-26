@@ -51,8 +51,7 @@ func (h *BookHandler) Create(c *gin.Context) {
 
 	out, err := h.store.Create(c, newBook)
 	if err != nil {
-		text := fmt.Sprintf("Create: %s", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
@@ -83,7 +82,11 @@ func (h *BookHandler) Checkout(c *gin.Context) {
 	}
 
 	book.Quantity -= 1
-	h.store.Update(c, book)
+	if err := h.store.Update(c, book); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, book)
 }
 
@@ -105,6 +108,10 @@ func (h *BookHandler) Return(c *gin.Context) {
 	}
 
 	book.Quantity += 1
-	h.store.Update(c, book)
+	if err := h.store.Update(c, book); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, book)
 }
