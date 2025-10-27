@@ -60,7 +60,7 @@ func (s *MySQL) List(ctx context.Context) ([]book.Book, error) {
 }
 
 func (s *MySQL) FindById(ctx context.Context, id string) (book.Book, error) {
-	const q = `SELECT id, title, author, quantity FROM Books where id=?`
+	const q = `SELECT id, title, author, quantity FROM Books where id=?;`
 	row := s.DB.QueryRowContext(ctx, q, id) // QueryRowContext runs a query supposed to bring only one result
 
 	var b book.Book
@@ -77,9 +77,9 @@ func (s *MySQL) FindById(ctx context.Context, id string) (book.Book, error) {
 
 func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	const q = `INSERT INTO Books (id, title, author, quantity)
-				VALUES (?, ?, ?, ?)`
+				VALUES (?, ?, ?, ?);`
 
-	_, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity)
+	_, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity, b.ID)
 
 	if err != nil {
 		return "", err
@@ -88,12 +88,57 @@ func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	return b.ID, nil
 }
 
-func (s *MySQL) Update(ctx context.Context, b book.Book) error { /*TODO*/
+func (s *MySQL) Update(ctx context.Context, b book.Book) error {
+	const q = `UPDATE Books
+				SET title=?, author=?, quantity=?
+				WHERE id=?;`
+
+	if _, err := s.DB.ExecContext(ctx, q, b.Title, b.Author, b.Quantity, b.ID); err != nil {
+		return err
+	}
+
 	return nil
 }
 func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) { /*TODO*/
-	return []book.Book{}, nil
+	const q = `SELECT * from Books
+				WHERE title=?;`
+
+	rows, err := s.DB.QueryContext(ctx, q, title)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []book.Book
+	for rows.Next() {
+		var b book.Book
+		if err := rows.Scan(&b.ID, &b.Title, &b.Author, &b.Quantity); err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+
+	return out, nil
 }
+
 func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) { /*TODO*/
-	return []book.Book{}, nil
+	const q = `SELECT * from Books
+				WHERE author=?;`
+
+	rows, err := s.DB.QueryContext(ctx, q, author)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []book.Book
+	for rows.Next() {
+		var b book.Book
+		if err := rows.Scan(&b.ID, &b.Title, &b.Author, &b.Quantity); err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+
+	return out, nil
 }
