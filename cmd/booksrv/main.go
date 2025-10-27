@@ -36,5 +36,5 @@ func main() {
 //TODO: create a method that based on env var creates the desired store
 //TODO: create connection string for database from env vars `root:root@tcp(localhost:3306)/mysqldb?parseTime=true`
 //TODO: create a path for json store on env vars seed/books.json
-//TODO: implement getByTitle and getByAuthor
+//TODO: implement getByTitle and getByAuthor using CONTAINS and not equals!
 //TODO: add dynamic id generation for book creation using UUID

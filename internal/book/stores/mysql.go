@@ -36,7 +36,8 @@ func NewMySQL(dsn string) (*MySQL, error) {
 // (s *SQLite) is my receiver, which can be used to call these functions
 // List offers reading for all the current stored books. Returns a slice of books.
 func (s *MySQL) List(ctx context.Context) ([]book.Book, error) {
-	const q = `SELECT id, title, author, quantity FROM Books`
+	const q = `SELECT id, title, author, quantity FROM Books
+				ORDER BY author;`
 	rows, err := s.DB.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -101,7 +102,8 @@ func (s *MySQL) Update(ctx context.Context, b book.Book) error {
 }
 func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) { /*TODO*/
 	const q = `SELECT * from Books
-				WHERE title=?;`
+				WHERE title=?
+				ORDER BY author;`
 
 	rows, err := s.DB.QueryContext(ctx, q, title)
 	if err != nil {
@@ -109,7 +111,7 @@ func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, err
 	}
 	defer rows.Close()
 
-	var out []book.Book
+	out := []book.Book{}
 	for rows.Next() {
 		var b book.Book
 		if err := rows.Scan(&b.ID, &b.Title, &b.Author, &b.Quantity); err != nil {
@@ -123,7 +125,8 @@ func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, err
 
 func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) { /*TODO*/
 	const q = `SELECT * from Books
-				WHERE author=?;`
+				WHERE author=?
+				ORDER BY author;`
 
 	rows, err := s.DB.QueryContext(ctx, q, author)
 	if err != nil {
@@ -131,7 +134,7 @@ func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, e
 	}
 	defer rows.Close()
 
-	var out []book.Book
+	out := []book.Book{}
 	for rows.Next() {
 		var b book.Book
 		if err := rows.Scan(&b.ID, &b.Title, &b.Author, &b.Quantity); err != nil {

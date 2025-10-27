@@ -20,100 +20,123 @@ func NewHandler(store Store) *BookHandler {
 }
 
 /*FindAll returns the json version of my book slice*/
-func (h *BookHandler) FindAll(c *gin.Context) {
-	out, err := h.store.List(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, err.Error())
+func (h *BookHandler) FindAll(ctx *gin.Context) {
+
+	if title := ctx.Query("title"); title != "" {
+		books, err := h.store.FindByTitle(ctx, title)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.IndentedJSON(http.StatusOK, books)
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, out)
+	if author := ctx.Query("author"); author != "" {
+		books, err := h.store.FindByAuthor(ctx, author)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.IndentedJSON(http.StatusOK, books)
+		return
+	}
+
+	out, err := h.store.List(ctx)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, out)
 }
 
 /*GetById returns the json version of desired book */
-func (h *BookHandler) GetById(c *gin.Context) {
-	id := c.Param("id")
-	book, err := h.store.FindById(c, id)
+func (h *BookHandler) GetById(ctx *gin.Context) {
+	id := ctx.Param("id")
+	book, err := h.store.FindById(ctx, id)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, book)
 }
 
 /*Create creates a book and the json version of my book slice*/
-func (h *BookHandler) Create(c *gin.Context) {
+func (h *BookHandler) Create(ctx *gin.Context) {
 	var newBook Book
 
-	if err := c.BindJSON(&newBook); err != nil {
+	if err := ctx.BindJSON(&newBook); err != nil {
 		text := fmt.Sprintf("BindJSON: %s", err.Error())
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
 		return
 	}
 
-	out, err := h.store.Create(c, newBook)
+	out, err := h.store.Create(ctx, newBook)
 	if err != nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, out)
+	ctx.IndentedJSON(http.StatusCreated, out)
 }
 
 /*Checkout retrieves an available book from the library*/
-func (h *BookHandler) Checkout(c *gin.Context) {
-	id, ok := c.GetQuery("id")
+func (h *BookHandler) Checkout(ctx *gin.Context) {
+	id, ok := ctx.GetQuery("id")
 
 	if !ok {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "No id sent"})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "No id sent"})
 		return
 	}
 
-	book, err := h.store.FindById(c, id)
+	book, err := h.store.FindById(ctx, id)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	if book.Quantity == 0 {
 		text := fmt.Sprintf("Book '%s' is not available", book.Title)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
 		return
 	}
 
 	book.Quantity -= 1
-	if err := h.store.Update(c, book); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := h.store.Update(ctx, book); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, book)
 }
 
 /*Return retrieves an available book from the library*/
-func (h *BookHandler) Return(c *gin.Context) {
-	id, ok := c.GetQuery("id")
+func (h *BookHandler) Return(ctx *gin.Context) {
+	id, ok := ctx.GetQuery("id")
 
 	if !ok {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "No id sent"})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "No id sent"})
 		return
 	}
 
-	book, err := h.store.FindById(c, id)
+	book, err := h.store.FindById(ctx, id)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	book.Quantity += 1
-	if err := h.store.Update(c, book); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := h.store.Update(ctx, book); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, book)
 }
