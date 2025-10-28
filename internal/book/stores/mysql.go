@@ -80,7 +80,7 @@ func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	const q = `INSERT INTO Books (id, title, author, quantity)
 				VALUES (?, ?, ?, ?);`
 
-	_, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity, b.ID)
+	_, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity)
 
 	if err != nil {
 		return "", err
