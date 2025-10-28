@@ -102,10 +102,11 @@ func (s *MySQL) Update(ctx context.Context, b book.Book) error {
 }
 func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) { /*TODO*/
 	const q = `SELECT * from Books
-				WHERE title=?
+				WHERE title LIKE ?
 				ORDER BY author;`
 
-	rows, err := s.DB.QueryContext(ctx, q, title)
+	like := "%" + title + "%"
+	rows, err := s.DB.QueryContext(ctx, q, like)
 	if err != nil {
 		return nil, err
 	}
@@ -125,10 +126,11 @@ func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, err
 
 func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) { /*TODO*/
 	const q = `SELECT * from Books
-				WHERE author=?
+				WHERE author LIKE ?
 				ORDER BY author;`
 
-	rows, err := s.DB.QueryContext(ctx, q, author)
+	like := "%" + author + "%"
+	rows, err := s.DB.QueryContext(ctx, q, like)
 	if err != nil {
 		return nil, err
 	}

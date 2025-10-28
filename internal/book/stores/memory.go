@@ -88,10 +88,11 @@ func (m *Memory) FindByTitle(ctx context.Context, title string) ([]book.Book, er
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	needle := strings.ToLower(title)
 	out := make([]book.Book, 0)
 
 	for _, b := range m.items {
-		if strings.EqualFold(b.Title, title) {
+		if strings.Contains(strings.ToLower(b.Title), needle) {
 			out = append(out, b)
 		}
 	}
@@ -104,10 +105,11 @@ func (m *Memory) FindByAuthor(ctx context.Context, author string) ([]book.Book, 
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	needle := strings.ToLower(author)
 	out := make([]book.Book, 0)
 
 	for _, b := range m.items {
-		if strings.EqualFold(b.Author, author) {
+		if strings.Contains(strings.ToLower(b.Author), needle) {
 			out = append(out, b)
 		}
 	}

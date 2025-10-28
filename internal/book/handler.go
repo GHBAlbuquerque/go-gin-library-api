@@ -21,6 +21,10 @@ func NewHandler(store Store) *BookHandler {
 
 /*FindAll returns the json version of my book slice*/
 func (h *BookHandler) FindAll(ctx *gin.Context) {
+	if ctx.Query("title") != "" && ctx.Query("author") != "" {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Either filter by title OR author"})
+		return
+	}
 
 	if title := ctx.Query("title"); title != "" {
 		books, err := h.store.FindByTitle(ctx, title)

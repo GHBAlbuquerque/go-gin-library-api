@@ -180,10 +180,11 @@ func (j *JSON) FindByTitle(ctx context.Context, title string) ([]book.Book, erro
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
+	needle := strings.ToLower(title)
 	var out = make([]book.Book, 0, len(j.data))
 
 	for _, current := range j.data {
-		if strings.EqualFold(current.Title, title) {
+		if strings.Contains(strings.ToLower(current.Title), needle) {
 			out = append(out, current)
 		}
 	}
@@ -196,10 +197,11 @@ func (j *JSON) FindByAuthor(ctx context.Context, author string) ([]book.Book, er
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
+	needle := strings.ToLower(author)
 	var out = make([]book.Book, 0, len(j.data))
 
 	for _, current := range j.data {
-		if strings.EqualFold(current.Author, author) {
+		if strings.Contains(strings.ToLower(current.Author), needle) {
 			out = append(out, current)
 		}
 	}
