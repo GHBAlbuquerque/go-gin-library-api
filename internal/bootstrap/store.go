@@ -4,6 +4,7 @@ import (
 	"example/go-gin-library-api/internal/book"
 	"example/go-gin-library-api/internal/book/stores"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -26,18 +27,18 @@ func NewStoreFromEnv() (book.Store, error) {
 		return nil, fmt.Errorf("godotenv.Load: variable BOOK_STORE not found")
 	}
 
+	log.Printf("Starting application with store %q", env)
+
 	switch strings.ToLower(env) {
 	case "mysql":
-		return stores.NewMySQL(`root:root@tcp(localhost:3306)/mysqldb?parseTime=true`)
+		dsn := os.Getenv("BOOK_MYSQL_DSN")
+		return stores.NewMySQL(dsn)
 	case "json":
-		return stores.NewJSON("seed/books.json", books)
+		path := os.Getenv("BOOK_JSON_PATH")
+		return stores.NewJSON(path, books)
 	case "memory":
 		return stores.NewMemory(books)
 	default:
 		return nil, fmt.Errorf("unknown BOOK_STORE %q", env)
 	}
 }
-
-//TODO: create a method that based on env var creates the desired store
-//TODO: create connection string for database from env vars //stores.NewMySQL(`root:root@tcp(localhost:3306)/mysqldb?parseTime=true`)
-//TODO: create a path for json store on env vars seed/books.json
