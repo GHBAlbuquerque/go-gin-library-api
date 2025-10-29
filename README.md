@@ -26,7 +26,7 @@ Features:
     docker compose down -v
     ```
 
-3) To start the server, run the following command
+3) To start the server, run the following command `(Requires Go 1.22+)`
     ```bash
     go run ./cmd/booksrv
     ```
@@ -104,6 +104,8 @@ curl -X PATCH "http://localhost:8080/return?id=1"
 
 ## 🌼 Future ideas
 - Add validation and better error handling
+- Pagination
+- Authentication
 
 ---
 
