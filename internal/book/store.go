@@ -2,12 +2,6 @@ package book
 
 import (
 	"context"
-	"fmt"
-)
-
-var (
-	ErrNotFound  = fmt.Errorf("Book not found")
-	ErrDuplicate = fmt.Errorf("Book already exists")
 )
 
 type Store interface {
