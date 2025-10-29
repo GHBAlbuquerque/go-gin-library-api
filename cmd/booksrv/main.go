@@ -24,4 +24,5 @@ func main() {
 	r.Run("localhost:8080")
 }
 
-//TODO: add dynamic id generation for book creation using UUID
+//TODO: add authentication and cors on middleware layer
+//TODO: unit testing

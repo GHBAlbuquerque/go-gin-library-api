@@ -3,6 +3,8 @@ package book
 import (
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type BookFilters struct {
@@ -12,7 +14,7 @@ type BookFilters struct {
 type Service interface {
 	FindAll(ctx context.Context, filters BookFilters) ([]Book, error)
 	GetById(ctx context.Context, id string) (Book, error)
-	Create(ctx context.Context, newBook Book) (string, error)
+	Create(ctx context.Context, BookRequest BookRequest) (string, error)
 	Checkout(ctx context.Context, id string) (Book, error)
 	Return(ctx context.Context, id string) (Book, error)
 }
@@ -70,7 +72,9 @@ func (s *BookService) GetById(ctx context.Context, id string) (Book, error) {
 }
 
 /*Create creates a book and the json version of my book slice*/
-func (s *BookService) Create(ctx context.Context, newBook Book) (string, error) {
+func (s *BookService) Create(ctx context.Context, bookRequest BookRequest) (string, error) {
+	id := uuid.NewString()
+	newBook := Book{id, bookRequest.Title, bookRequest.Author, bookRequest.Quantity}
 
 	out, err := s.store.Create(ctx, newBook)
 	if err != nil {
