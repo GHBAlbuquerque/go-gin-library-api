@@ -8,7 +8,6 @@ Features:
 - REST API for library management (CRUD operations)
 - Local infrastructure with docker compose
 
----
 
 ## 🚀 How to run
 
