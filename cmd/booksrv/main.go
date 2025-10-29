@@ -4,12 +4,10 @@ import (
 	"example/go-gin-library-api/internal/book"
 	"example/go-gin-library-api/internal/bootstrap"
 	"log"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	router := gin.Default()
+
 	s, err := bootstrap.NewStoreFromEnv()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -17,14 +15,13 @@ func main() {
 	}
 
 	h := book.NewHandler(s)
+	r, err := newRouter(h)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
-	router.GET("/books", h.FindAll)
-	router.GET("/books/:id", h.GetById)
-	router.POST("/books", h.Create)
-	router.PATCH("/checkout", h.Checkout)
-	router.PATCH("/return", h.Return)
-
-	router.Run("localhost:8080")
+	r.Run("localhost:8080")
 }
 
 //TODO: add dynamic id generation for book creation using UUID
+// TODO: refactor to put logic on service package
