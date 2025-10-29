@@ -14,7 +14,8 @@ func main() {
 		return
 	}
 
-	h := book.NewHandler(s)
+	sv := book.NewService(s)
+	h := book.NewHandler(sv)
 	r, err := newRouter(h)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -24,4 +25,3 @@ func main() {
 }
 
 //TODO: add dynamic id generation for book creation using UUID
-// TODO: refactor to put logic on service package
