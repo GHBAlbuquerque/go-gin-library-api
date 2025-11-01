@@ -1,6 +1,7 @@
 package main
 
 import (
+	"example/go-gin-library-api/internal/auth"
 	"example/go-gin-library-api/internal/book"
 	"example/go-gin-library-api/internal/bootstrap"
 	"log"
@@ -16,7 +17,8 @@ func main() {
 
 	sv := book.NewService(s)
 	h := book.NewHandler(sv)
-	r, err := newRouter(h)
+	a := auth.NewAuthHandler()
+	r, err := newRouter(a, h)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
