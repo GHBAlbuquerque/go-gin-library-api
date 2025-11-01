@@ -8,12 +8,12 @@ import (
 )
 
 type BookHandler struct {
-	store Store // it's illegal to use pointers to interface types
+	service Service
 }
 
-func NewHandler(store Store) *BookHandler {
+func NewHandler(service Service) *BookHandler {
 	h := BookHandler{
-		store: store,
+		service: service,
 	}
 
 	return &h
@@ -22,36 +22,21 @@ func NewHandler(store Store) *BookHandler {
 /*FindAll returns the json version of my book slice*/
 func (h *BookHandler) FindAll(ctx *gin.Context) {
 	if ctx.Query("title") != "" && ctx.Query("author") != "" {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Either filter by title OR author"})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": ErrInvalidFilter.Error()})
 		return
 	}
 
-	if title := ctx.Query("title"); title != "" {
-		books, err := h.store.FindByTitle(ctx, title)
-		if err != nil {
-			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	filters := BookFilters{Author: ctx.Query("author"), Title: ctx.Query("title")}
 
-		ctx.IndentedJSON(http.StatusOK, books)
-		return
-	}
-
-	if author := ctx.Query("author"); author != "" {
-		books, err := h.store.FindByAuthor(ctx, author)
-		if err != nil {
-			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.IndentedJSON(http.StatusOK, books)
-		return
-	}
-
-	out, err := h.store.List(ctx)
+	books, err := h.service.FindAll(ctx, filters)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	out := make([]BookResponse, 0, len(books))
+	for _, book := range books {
+		out = append(out, BookResponse(book))
 	}
 
 	ctx.IndentedJSON(http.StatusOK, out)
@@ -60,27 +45,27 @@ func (h *BookHandler) FindAll(ctx *gin.Context) {
 /*GetById returns the json version of desired book */
 func (h *BookHandler) GetById(ctx *gin.Context) {
 	id := ctx.Param("id")
-	book, err := h.store.FindById(ctx, id)
+	book, err := h.service.GetById(ctx, id)
 
 	if err != nil {
 		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, BookResponse(book))
 }
 
 /*Create creates a book and the json version of my book slice*/
 func (h *BookHandler) Create(ctx *gin.Context) {
-	var newBook Book
+	var bookRequest BookRequest
 
-	if err := ctx.BindJSON(&newBook); err != nil {
+	if err := ctx.BindJSON(&bookRequest); err != nil {
 		text := fmt.Sprintf("BindJSON: %s", err.Error())
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
 		return
 	}
 
-	out, err := h.store.Create(ctx, newBook)
+	out, err := h.service.Create(ctx, bookRequest)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -98,26 +83,13 @@ func (h *BookHandler) Checkout(ctx *gin.Context) {
 		return
 	}
 
-	book, err := h.store.FindById(ctx, id)
-
+	book, err := h.service.Checkout(ctx, id)
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	if book.Quantity == 0 {
-		text := fmt.Sprintf("Book '%s' is not available", book.Title)
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": text})
-		return
-	}
-
-	book.Quantity -= 1
-	if err := h.store.Update(ctx, book); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, BookResponse(book))
 }
 
 /*Return retrieves an available book from the library*/
@@ -129,18 +101,11 @@ func (h *BookHandler) Return(ctx *gin.Context) {
 		return
 	}
 
-	book, err := h.store.FindById(ctx, id)
-
+	book, err := h.service.Return(ctx, id)
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	book.Quantity += 1
-	if err := h.store.Update(ctx, book); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusOK, book)
+	ctx.IndentedJSON(http.StatusOK, BookResponse(book))
 }

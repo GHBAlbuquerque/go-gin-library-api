@@ -37,6 +37,77 @@
 			"response": []
 		},
 		{
+			"name": "Get Books filtered",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/books?author=to&title=to",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "author",
+							"value": "to"
+						},
+						{
+							"key": "title",
+							"value": "to"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Books by ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/books/4",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"books",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create Book",
 			"request": {
 				"method": "POST",
@@ -49,7 +120,34 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "    {\n        \"id\": \"4\",\n        \"title\": \"To Kill a Mockingbird\",\n        \"author\": \"Harper Lee\",\n        \"quantity\": 2\n    }"
+					"raw": "    {\n        \"title\": \"The Master and Margarita\",\n        \"author\": \"Mikhail Bulgakov\",\n        \"quantity\": 3\n    }"
+				},
+				"url": {
+					"raw": "{{baseURL}}/books",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Book (invalid)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "    {\n        \"title\": \"To Kill a Mockingbird\",\n        \"quantity\": 0\n    }"
 				},
 				"url": {
 					"raw": "{{baseURL}}/books",
@@ -79,7 +177,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/checkout?id=1",
+					"raw": "{{baseURL}}/checkout?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -89,7 +187,73 @@
 					"query": [
 						{
 							"key": "id",
-							"value": "1"
+							"value": "7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Return",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/return?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"return"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Return (invalid)",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/return?id=34",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"return"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "34"
 						}
 					]
 				}

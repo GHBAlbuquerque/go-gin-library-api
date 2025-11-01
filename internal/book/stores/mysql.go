@@ -80,9 +80,12 @@ func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	const q = `INSERT INTO Books (id, title, author, quantity)
 				VALUES (?, ?, ?, ?);`
 
-	_, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity)
+	books, _ := s.FindByTitleAndAuthor(ctx, b.Title, b.Author)
+	if len(books) > 0 {
+		return "", book.ErrDuplicate
+	}
 
-	if err != nil {
+	if _, err := s.DB.ExecContext(ctx, q, b.ID, b.Title, b.Author, b.Quantity); err != nil {
 		return "", err
 	}
 
@@ -100,10 +103,10 @@ func (s *MySQL) Update(ctx context.Context, b book.Book) error {
 
 	return nil
 }
-func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) { /*TODO*/
+func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	const q = `SELECT * from Books
 				WHERE title LIKE ?
-				ORDER BY author;`
+				ORDER BY title;`
 
 	like := "%" + title + "%"
 	rows, err := s.DB.QueryContext(ctx, q, like)
@@ -124,13 +127,37 @@ func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, err
 	return out, nil
 }
 
-func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) { /*TODO*/
+func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	const q = `SELECT * from Books
 				WHERE author LIKE ?
 				ORDER BY author;`
 
 	like := "%" + author + "%"
 	rows, err := s.DB.QueryContext(ctx, q, like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := []book.Book{}
+	for rows.Next() {
+		var b book.Book
+		if err := rows.Scan(&b.ID, &b.Title, &b.Author, &b.Quantity); err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+
+	return out, nil
+}
+
+func (s *MySQL) FindByTitleAndAuthor(ctx context.Context, title, author string) ([]book.Book, error) {
+	const q = `SELECT * from Books
+				WHERE title=?
+				AND author=? 
+				ORDER BY author;`
+
+	rows, err := s.DB.QueryContext(ctx, q, title, author)
 	if err != nil {
 		return nil, err
 	}

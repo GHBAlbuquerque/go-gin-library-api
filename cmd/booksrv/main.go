@@ -14,7 +14,8 @@ func main() {
 		return
 	}
 
-	h := book.NewHandler(s)
+	sv := book.NewService(s)
+	h := book.NewHandler(sv)
 	r, err := newRouter(h)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -23,5 +24,5 @@ func main() {
 	r.Run("localhost:8080")
 }
 
-//TODO: add dynamic id generation for book creation using UUID
-// TODO: refactor to put logic on service package
+//TODO: add authentication and cors on middleware layer
+//TODO: unit testing
