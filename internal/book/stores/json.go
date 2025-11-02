@@ -175,7 +175,7 @@ func (j *JSON) Update(ctx context.Context, b book.Book) error {
 	return j.persist()
 }
 
-// FindByTitle returns a slice of books found by a title
+// FindByTitle returns a slice of books found by a title.
 func (j *JSON) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
