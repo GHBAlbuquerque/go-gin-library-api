@@ -22,8 +22,8 @@ type JwtService struct {
 func NewService(secretKey, issuer, audience string) Service {
 	j := JwtService{
 		secretKey: []byte(secretKey),
-		issuer:    issuer,
-		audience:  audience,
+		issuer:    issuer,   // std field in jwt; who created the token.
+		audience:  audience, // std field in jwt;  who is supposed to accept and trust this token.
 	}
 
 	return &j
@@ -55,7 +55,21 @@ func (s *JwtService) IssueToken(clientID string, ttl time.Duration) (TokenRes, e
 
 // ParseAndValidate parses a received token and returns its claims or an error.
 func (s *JwtService) ParseAndValidate(tokenStr string) (*Claims, error) {
-	//TODO
+	token, err := jwt.ParseWithClaims(tokenStr,
+		&Claims{}, // Tells the library what type of claims you expect (my struct)
+		func(t *jwt.Token) (interface{}, error) { // This tells the library which secret key to use to verify the signature.
+			return s.secretKey, nil
+		}, jwt.WithAudience(s.audience), // ensures the token’s "aud" claim matches your expected audience.
+		jwt.WithIssuer(s.issuer)) //  ensures the token’s "iss" claim matches your expected issuer.
 
-	return &Claims{}, nil
+	if err != nil {
+		return nil, err
+	}
+
+	c, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	return c, nil
 }
