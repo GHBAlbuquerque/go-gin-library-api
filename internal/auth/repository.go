@@ -16,7 +16,14 @@ func NewInMemoryClientRepo(seed map[string]string) *InMemoryClientRepo {
 
 // Validate returns if requesting client (clientID and clientSecret) exist in the database.
 func (r *InMemoryClientRepo) Validate(clientID, clientSecret string) bool {
-	//TODO
+	secret, exists := r.credentials[clientID]
+	if !exists {
+		return false
+	}
+
+	if secret != clientSecret {
+		return false
+	}
 
 	return false
 }

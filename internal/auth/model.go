@@ -13,6 +13,14 @@ type TokenRes struct {
 }
 
 type Claims struct {
-	ClientID string `json:"cid"`
-	Claims   jwt.RegisteredClaims
+	ClientID             string `json:"cid"`
+	jwt.RegisteredClaims        // embedded field of RegisteredClaims inside my struct
 }
+
+/*
+	{
+	"cid": "frontend",
+	"exp": 1730490000,
+	"iss": "go-gin-library-api"
+	}
+*/
