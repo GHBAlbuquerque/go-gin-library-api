@@ -2,32 +2,53 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
+	repository ClientRepository
+	service    Service
 }
 
 // NewHandler creates the Auth endpoint for authentication request.
-func NewHandler() *Handler {
-	a := Handler{}
+func NewHandler(repository ClientRepository, service Service) *Handler {
+	a := Handler{
+		repository: repository,
+		service:    service,
+	}
 
 	return &a
 }
 
 // RequestAuth returns a Bearer Token if credentials received on client_id and client_secret are valid.
-func (a *Handler) RequestAuth(ctx *gin.Context) {
-	clientId := ctx.Query("client_id")
-	clientSecret := ctx.Query("client_secret")
+func (h *Handler) RequestAuth(ctx *gin.Context) {
 
-	if clientId == "" || clientSecret == "" {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": ErrInvalidRequest.Error()})
+	grantType := ctx.PostForm("grant_type")
+	if grantType != "client_credentials" {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": ErrInvalidAuthType.Error()})
 		return
 	}
 
-	authReq := AuthReq{ClientID: clientId, ClientSecret: clientSecret}
+	clientID := ctx.PostForm("client_id")
+	clientSecret := ctx.PostForm("client_secret")
 
-	//TODO
-	ctx.IndentedJSON(http.StatusOK, authReq)
+	if clientID == "" || clientSecret == "" {
+		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidRequest.Error()})
+		return
+	}
+
+	if exists := h.repository.Validate(clientID, clientSecret); !exists {
+		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidCredentials.Error()})
+		return
+	}
+
+	tok, err := h.service.IssueToken(clientID, time.Second)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrOnTokenIssue.Error()})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, tok)
 }
