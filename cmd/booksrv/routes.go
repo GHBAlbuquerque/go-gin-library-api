@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newRouter(a *auth.AuthHandler, h *book.BookHandler) (*gin.Engine, error) {
+func newRouter(a *auth.Handler, h *book.Handler) (*gin.Engine, error) {
 	router := gin.Default()
 
 	router.POST("/auth/token", a.RequestAuth)

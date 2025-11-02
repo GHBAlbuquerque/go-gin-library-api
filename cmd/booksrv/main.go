@@ -17,7 +17,7 @@ func main() {
 
 	sv := book.NewService(s)
 	h := book.NewHandler(sv)
-	a := auth.NewAuthHandler()
+	a := auth.NewHandler()
 	r, err := newRouter(a, h)
 	if err != nil {
 		log.Fatal(err.Error())
