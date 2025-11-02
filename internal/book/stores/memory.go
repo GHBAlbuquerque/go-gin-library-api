@@ -83,7 +83,7 @@ func (m *Memory) Update(ctx context.Context, b book.Book) error {
 	return nil
 }
 
-// FindByTitle returns a slice of books found by a title
+// FindByTitle returns a slice of books found by a title.
 func (m *Memory) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -100,7 +100,7 @@ func (m *Memory) FindByTitle(ctx context.Context, title string) ([]book.Book, er
 	return out, nil
 }
 
-// FindByAuthor returns a slice of books found by an author
+// FindByAuthor returns a slice of books found by an author.
 func (m *Memory) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

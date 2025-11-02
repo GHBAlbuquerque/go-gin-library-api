@@ -23,7 +23,7 @@ type BookService struct {
 	store Store // it's illegal to use pointers to interface types
 }
 
-func NewService(store Store) *BookService {
+func NewService(store Store) Service {
 	s := BookService{
 		store: store,
 	}
@@ -31,7 +31,7 @@ func NewService(store Store) *BookService {
 	return &s
 }
 
-/*FindAll returns the json version of my book slice*/
+// FindAll returns a slice of books, filtered or not.
 func (s *BookService) FindAll(ctx context.Context, filters BookFilters) ([]Book, error) {
 
 	if title := filters.Title; title != "" {
@@ -60,7 +60,7 @@ func (s *BookService) FindAll(ctx context.Context, filters BookFilters) ([]Book,
 	return out, nil
 }
 
-/*GetById returns the json version of desired book */
+// GetById returns the desired book, found by id.
 func (s *BookService) GetById(ctx context.Context, id string) (Book, error) {
 	book, err := s.store.FindById(ctx, id)
 
@@ -71,7 +71,7 @@ func (s *BookService) GetById(ctx context.Context, id string) (Book, error) {
 	return book, nil
 }
 
-/*Create creates a book and the json version of my book slice*/
+// Create creates a new book in the store.
 func (s *BookService) Create(ctx context.Context, bookRequest BookRequest) (string, error) {
 	id := uuid.NewString()
 	newBook := Book{id, bookRequest.Title, bookRequest.Author, bookRequest.Quantity}
@@ -84,7 +84,7 @@ func (s *BookService) Create(ctx context.Context, bookRequest BookRequest) (stri
 	return out, nil
 }
 
-/*Checkout retrieves an available book from the library*/
+// Checkout retrieves an available book from the library.
 func (s *BookService) Checkout(ctx context.Context, id string) (Book, error) {
 	book, err := s.store.FindById(ctx, id)
 
@@ -104,7 +104,7 @@ func (s *BookService) Checkout(ctx context.Context, id string) (Book, error) {
 	return book, nil
 }
 
-/*Return retrieves an available book from the library*/
+// Return gives back a book to the library.
 func (s *BookService) Return(ctx context.Context, id string) (Book, error) {
 	book, err := s.store.FindById(ctx, id)
 
