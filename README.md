@@ -9,8 +9,6 @@ Features:
 - Authentication using OAuth 2.0
 - Local infrastructure with docker compose
 
-//TODO: unit testing
-
 ## 🚀 How to run
 
 1) Select the desired store by changing the BOOK_STORE on .env file
@@ -54,14 +52,14 @@ Features:
 
 ## 📖 Available Endpoints
 
-| Method | Endpoint               | Description                                                            |
-|--------|------------------------|------------------------------------------------------------------------|
-| `POST` | `/auth/token`          | Issues a bearer token when given valid `client_id` and `client_secret` |
-| `GET`  | `/api/books`           | Returns all books in the library. Can be filtered by `author` or `title` *(requires `Authorization` header)* |
-| `GET`  | `/api/books/:id`       | Returns a specific book by ID *(requires `Authorization` header)* |
-| `POST` | `/api/books`           | Adds a new book to the library *(requires `Authorization` header)* |
-| `PATCH`| `/api/checkout?id=1`   | Checks out (borrows) a book *(requires `Authorization` header)* |
-| `PATCH`| `/api/return?id=1`     | Returns a borrowed book *(requires `Authorization` header)* |
+| Method | Endpoint               | Description                                                            | Auth? | 
+|--------|------------------------|------------------------------------------------------------------------|-------|
+| `POST` | `/auth/token`          | Issues a bearer token when given valid `client_id` and `client_secret` |No auth.|
+| `GET`  | `/api/books`           | Returns all books in the library. Can be filtered by `author` or `title` | *(requires `Authorization` header)* |
+| `GET`  | `/api/books/:id`       | Returns a specific book by ID | *(requires `Authorization` header)* |
+| `POST` | `/api/books`           | Adds a new book to the library | *(requires `Authorization` header)* |
+| `PATCH`| `/api/checkout?id=1`   | Checks out (borrows) a book | *(requires `Authorization` header)* |
+| `PATCH`| `/api/return?id=1`     | Returns a borrowed book | *(requires `Authorization` header)* |
 
 ---
 
@@ -69,7 +67,10 @@ Features:
 
 ### ➕ Create a book
 ```bash
-curl -X POST http://localhost:8080/books   -H "Content-Type: application/json"   -d '{
+curl -X POST http://localhost:8080/books   
+    -H "Content-Type: application/json"   
+    -H "Authorization: Bearer …"
+    -d '{
     "id": "4",
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
@@ -79,33 +80,32 @@ curl -X POST http://localhost:8080/books   -H "Content-Type: application/json"  
 
 ### 📗 Get all books
 ```bash
-curl http://localhost:8080/books
+curl http://localhost:8080/api/books -H "Authorization: Bearer …"
 ```
 
 Filter by title:
 ```bash
-curl http://localhost:8080/books?title=pride
+curl http://localhost:8080/api/books?title=pride -H "Authorization: Bearer …"
 ```
 
 Filter by author:
 ```bash
-curl http://localhost:8080/books?author=fiodor
+curl http://localhost:8080/api/books?author=fiodor -H "Authorization: Bearer …"
 ```
-
 
 ### 📘 Get a specific book
 ```bash
-curl http://localhost:8080/books/1
+curl http://localhost:8080/api/books/1 -H "Authorization: Bearer …"
 ```
 
 ### 📕 Checkout a book
 ```bash
-curl -X PATCH "http://localhost:8080/checkout?id=1"
+curl -X PATCH "http://localhost:8080/api/checkout?id=1" -H "Authorization: Bearer …"
 ```
 
 ### 📙 Return a book
 ```bash
-curl -X PATCH "http://localhost:8080/return?id=1"
+curl -X PATCH "http://localhost:8080/api/return?id=1" -H "Authorization: Bearer …"
 ```
 
 ---
@@ -120,7 +120,7 @@ curl -X PATCH "http://localhost:8080/return?id=1"
 ## 🌼 Future ideas
 - Add validation and better error handling
 - Pagination
-- Authentication
+- Unit testing
 
 ---
 
