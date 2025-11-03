@@ -25,5 +25,5 @@ func (r *InMemoryClientRepo) Validate(clientID, clientSecret string) bool {
 		return false
 	}
 
-	return false
+	return true
 }
