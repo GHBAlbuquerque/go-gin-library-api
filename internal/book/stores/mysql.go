@@ -14,7 +14,7 @@ type MySQL struct {
 	DB *sql.DB
 }
 
-// NewMySQL creates a SQLiteStore
+// NewMySQL creates a SQLiteStore.
 func NewMySQL(dsn string) (*MySQL, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -60,6 +60,7 @@ func (s *MySQL) List(ctx context.Context) ([]book.Book, error) {
 	return out, nil
 }
 
+// FindById queries a book by its id.
 func (s *MySQL) FindById(ctx context.Context, id string) (book.Book, error) {
 	const q = `SELECT id, title, author, quantity FROM Books where id=?;`
 	row := s.DB.QueryRowContext(ctx, q, id) // QueryRowContext runs a query supposed to bring only one result
@@ -76,6 +77,7 @@ func (s *MySQL) FindById(ctx context.Context, id string) (book.Book, error) {
 	return b, nil
 }
 
+// Create writes a new book.
 func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	const q = `INSERT INTO Books (id, title, author, quantity)
 				VALUES (?, ?, ?, ?);`
@@ -92,6 +94,7 @@ func (s *MySQL) Create(ctx context.Context, b book.Book) (string, error) {
 	return b.ID, nil
 }
 
+// Update makes an uodate on an existing book.
 func (s *MySQL) Update(ctx context.Context, b book.Book) error {
 	const q = `UPDATE Books
 				SET title=?, author=?, quantity=?
@@ -103,6 +106,8 @@ func (s *MySQL) Update(ctx context.Context, b book.Book) error {
 
 	return nil
 }
+
+// FindByTitle returns a slice of books found by a title.
 func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	const q = `SELECT * from Books
 				WHERE title LIKE ?
@@ -127,6 +132,7 @@ func (s *MySQL) FindByTitle(ctx context.Context, title string) ([]book.Book, err
 	return out, nil
 }
 
+// FindByAuthor returns a slice of books found by an author.
 func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	const q = `SELECT * from Books
 				WHERE author LIKE ?
@@ -151,6 +157,7 @@ func (s *MySQL) FindByAuthor(ctx context.Context, author string) ([]book.Book, e
 	return out, nil
 }
 
+// FindByAuthor returns a slice of books found by title and author (matches exactly).
 func (s *MySQL) FindByTitleAndAuthor(ctx context.Context, title, author string) ([]book.Book, error) {
 	const q = `SELECT * from Books
 				WHERE title=?

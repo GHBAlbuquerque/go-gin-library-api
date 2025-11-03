@@ -7,20 +7,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type BookHandler struct {
+type Handler struct {
 	service Service
 }
 
-func NewHandler(service Service) *BookHandler {
-	h := BookHandler{
+func NewHandler(service Service) *Handler {
+	h := Handler{
 		service: service,
 	}
 
 	return &h
 }
 
-/*FindAll returns the json version of my book slice*/
-func (h *BookHandler) FindAll(ctx *gin.Context) {
+// FindAll returns the json version of my book slice.
+func (h *Handler) FindAll(ctx *gin.Context) {
 	if ctx.Query("title") != "" && ctx.Query("author") != "" {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": ErrInvalidFilter.Error()})
 		return
@@ -42,8 +42,8 @@ func (h *BookHandler) FindAll(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, out)
 }
 
-/*GetById returns the json version of desired book */
-func (h *BookHandler) GetById(ctx *gin.Context) {
+// GetById returns the json version of desired book.
+func (h *Handler) GetById(ctx *gin.Context) {
 	id := ctx.Param("id")
 	book, err := h.service.GetById(ctx, id)
 
@@ -55,8 +55,8 @@ func (h *BookHandler) GetById(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, BookResponse(book))
 }
 
-/*Create creates a book and the json version of my book slice*/
-func (h *BookHandler) Create(ctx *gin.Context) {
+// Create creates a book and the json version of my book slice.
+func (h *Handler) Create(ctx *gin.Context) {
 	var bookRequest BookRequest
 
 	if err := ctx.BindJSON(&bookRequest); err != nil {
@@ -74,8 +74,8 @@ func (h *BookHandler) Create(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusCreated, out)
 }
 
-/*Checkout retrieves an available book from the library*/
-func (h *BookHandler) Checkout(ctx *gin.Context) {
+// Checkout retrieves an available book from the library.
+func (h *Handler) Checkout(ctx *gin.Context) {
 	id, ok := ctx.GetQuery("id")
 
 	if !ok {
@@ -92,8 +92,8 @@ func (h *BookHandler) Checkout(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, BookResponse(book))
 }
 
-/*Return retrieves an available book from the library*/
-func (h *BookHandler) Return(ctx *gin.Context) {
+// Return retrieves an available book from the library.
+func (h *Handler) Return(ctx *gin.Context) {
 	id, ok := ctx.GetQuery("id")
 
 	if !ok {

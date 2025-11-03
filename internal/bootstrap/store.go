@@ -18,7 +18,7 @@ var books = []book.Book{
 	{ID: uuid.NewString(), Title: "War and Peace", Author: "Leo Tolstoy", Quantity: 6},
 }
 
-func NewStoreFromEnv() (book.Store, error) {
+func newStoreFromEnv() (book.Store, error) {
 	if err := godotenv.Load(".env"); err != nil {
 		return nil, fmt.Errorf("godotenv.Load: %w", err)
 	}

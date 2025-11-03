@@ -9,8 +9,19 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
+      "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/cmd/booksrv",
-      "env": {},
+      "env": {
+        "JWT_SECRET": "XXXXX",
+        "ISSUER": "ISSUER",
+        "AUDIENCE": "AUDIENCE",
+        "ADDR": "localhost:8080",
+        "CLIENT_ID": "first_client",
+        "CLIENT_SECRET": "first_password",
+        "BOOK_STORE": "memory",
+        "BOOK_MYSQL_DSN": "root:root@tcp(localhost:3306)/mysqldb?parseTime=true",
+        "BOOK_JSON_PATH": "data/books.json"
+      },
       "args": []
     }
   ]

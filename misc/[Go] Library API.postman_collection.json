@@ -7,11 +7,90 @@
 	},
 	"item": [
 		{
+			"name": "Auth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();",
+							"pm.collectionVariables.set(\"bearerToken\", body.access_token);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "first_client",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "first_password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/auth/token",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"auth",
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get Books",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
@@ -25,11 +104,12 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/books",
+					"raw": "{{baseURL}}/api/books",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"books"
 					]
 				}
@@ -42,6 +122,16 @@
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
@@ -55,11 +145,12 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/books?author=to&title=to",
+					"raw": "{{baseURL}}/api/books?author=to",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"books"
 					],
 					"query": [
@@ -69,7 +160,8 @@
 						},
 						{
 							"key": "title",
-							"value": "to"
+							"value": "to",
+							"disabled": true
 						}
 					]
 				}
@@ -82,6 +174,16 @@
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [
 					{
@@ -95,13 +197,14 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/books/4",
+					"raw": "{{baseURL}}/api/books/1f06889f-c7c9-4f46-9014-f74bc8c61d1f",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"books",
-						"4"
+						"1f06889f-c7c9-4f46-9014-f74bc8c61d1f"
 					]
 				}
 			},
@@ -110,6 +213,16 @@
 		{
 			"name": "Create Book",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -123,11 +236,12 @@
 					"raw": "    {\n        \"title\": \"The Master and Margarita\",\n        \"author\": \"Mikhail Bulgakov\",\n        \"quantity\": 3\n    }"
 				},
 				"url": {
-					"raw": "{{baseURL}}/books",
+					"raw": "{{baseURL}}/api/books",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"books"
 					]
 				}
@@ -137,6 +251,16 @@
 		{
 			"name": "Create Book (invalid)",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -150,11 +274,12 @@
 					"raw": "    {\n        \"title\": \"To Kill a Mockingbird\",\n        \"quantity\": 0\n    }"
 				},
 				"url": {
-					"raw": "{{baseURL}}/books",
+					"raw": "{{baseURL}}/api/books",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"books"
 					]
 				}
@@ -164,6 +289,16 @@
 		{
 			"name": "Checkout",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PATCH",
 				"header": [
 					{
@@ -177,11 +312,12 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/checkout?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
+					"raw": "{{baseURL}}/api/checkout?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"checkout"
 					],
 					"query": [
@@ -197,6 +333,16 @@
 		{
 			"name": "Return",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PATCH",
 				"header": [
 					{
@@ -210,11 +356,12 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/return?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
+					"raw": "{{baseURL}}/api/return?id=7f43c7b1-f8f0-4543-8db3-2f8a1cdde4ff",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"return"
 					],
 					"query": [
@@ -230,6 +377,16 @@
 		{
 			"name": "Return (invalid)",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearerToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PATCH",
 				"header": [
 					{
@@ -243,11 +400,12 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseURL}}/return?id=34",
+					"raw": "{{baseURL}}/api/return?id=34",
 					"host": [
 						"{{baseURL}}"
 					],
 					"path": [
+						"api",
 						"return"
 					],
 					"query": [
@@ -261,11 +419,38 @@
 			"response": []
 		}
 	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
 	"variable": [
 		{
 			"key": "baseURL",
-			"value": "",
-			"type": "default"
+			"value": ""
+		},
+		{
+			"key": "bearerToken",
+			"value": ""
 		}
 	]
 }

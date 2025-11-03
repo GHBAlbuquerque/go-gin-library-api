@@ -19,7 +19,7 @@ type JSON struct {
 }
 
 // (j *JSON) is my receiver, which can be used to call these functions
-// NewJSON creates a JSONstore
+// NewJSON creates a JSONstore.
 func NewJSON(path string, seed []book.Book) (*JSON, error) {
 	j := &JSON{
 		path: path,
@@ -44,7 +44,7 @@ func NewJSON(path string, seed []book.Book) (*JSON, error) {
 	return j, nil
 }
 
-// ensureDir ensures the directory exists on the desired path
+// ensureDir ensures the directory exists on the desired path.
 func ensureDir(path string) error {
 	// ensure dir on desired path exists
 	if dir := filepath.Dir(path); dir != "." {
@@ -56,7 +56,7 @@ func ensureDir(path string) error {
 	return nil
 }
 
-// ensureFileWithSeed creates the file with the seed if necessary, and returns a bool (created) to confirm creation
+// ensureFileWithSeed creates the file with the seed if necessary, and returns a bool (created) to confirm creation.
 func ensureFileWithSeed(path string, seed []book.Book, j *JSON) (bool, error) {
 	// load the file from dir
 	_, err := os.Stat(path)
@@ -82,7 +82,7 @@ func ensureFileWithSeed(path string, seed []book.Book, j *JSON) (bool, error) {
 	return false, nil
 }
 
-// persist writes the file atomically if it doesn't exist on the path
+// persist writes the file atomically if it doesn't exist on the path.
 func (j *JSON) persist() error {
 	tmp := j.path + ".tmp"
 
@@ -98,7 +98,7 @@ func (j *JSON) persist() error {
 	return os.Rename(tmp, j.path)
 }
 
-// loadFromFile reads the Json file from path and unmarshalls the content to the data map on JSON struct
+// loadFromFile reads the Json file from path and unmarshalls the content to the data map on JSON struct.
 func loadFromFile(path string, j *JSON) error {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
@@ -175,7 +175,7 @@ func (j *JSON) Update(ctx context.Context, b book.Book) error {
 	return j.persist()
 }
 
-// FindByTitle returns a slice of books found by a title
+// FindByTitle returns a slice of books found by a title.
 func (j *JSON) FindByTitle(ctx context.Context, title string) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
@@ -192,7 +192,7 @@ func (j *JSON) FindByTitle(ctx context.Context, title string) ([]book.Book, erro
 	return out, nil
 }
 
-// FindByAuthor returns a slice of books found by an author
+// FindByAuthor returns a slice of books found by an author.
 func (j *JSON) FindByAuthor(ctx context.Context, author string) ([]book.Book, error) {
 	j.mu.Lock()
 	defer j.mu.Unlock()

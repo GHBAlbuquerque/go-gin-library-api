@@ -6,8 +6,10 @@ Features:
 - Dynamic store selection (in memory, json file or sql database) and persistence
 - External environment variables file with .env
 - REST API for library management (CRUD operations)
+- Authentication using OAuth 2.0
 - Local infrastructure with docker compose
 
+//TODO: unit testing
 
 ## 🚀 How to run
 
@@ -29,23 +31,37 @@ Features:
     ```bash
     go run ./cmd/booksrv
     ```
+
 4) The server will start at:
     ```
     http://localhost:8080
     ```
-5) Call the endpoints and test out the API 🌼 
+
+5) Generate a Bearer Token by calling the '/auth/token' endpoint using the following credentials:
+    ```
+    "grant_type":"client_credentials"
+    "client_id":"first_client"
+    "client_secret":"first_password" 
+    ```
+
+6) Insert token on "Authorization" field of request 
+
+7) Call the endpoints and test out the API 🌼 
+
+* Postman collection inside /misc folder is already pre-configured for correct authentication and use. 
 
 ---
 
 ## 📖 Available Endpoints
 
-| Method | Endpoint           | Description |
-|--------|--------------------|--------------|
-| `GET`  | `/books`           | Returns all books in the library. Can be filtered by `author` or `title` |
-| `GET`  | `/books/:id`       | Returns a specific book by ID |
-| `POST` | `/books`           | Adds a new book to the library |
-| `PATCH`| `/checkout?id=1`   | Checks out (borrows) a book |
-| `PATCH`| `/return?id=1`     | Returns a borrowed book |
+| Method | Endpoint               | Description                                                            |
+|--------|------------------------|------------------------------------------------------------------------|
+| `POST` | `/auth/token`          | Issues a bearer token when given valid `client_id` and `client_secret` |
+| `GET`  | `/api/books`           | Returns all books in the library. Can be filtered by `author` or `title` *(requires `Authorization` header)* |
+| `GET`  | `/api/books/:id`       | Returns a specific book by ID *(requires `Authorization` header)* |
+| `POST` | `/api/books`           | Adds a new book to the library *(requires `Authorization` header)* |
+| `PATCH`| `/api/checkout?id=1`   | Checks out (borrows) a book *(requires `Authorization` header)* |
+| `PATCH`| `/api/return?id=1`     | Returns a borrowed book *(requires `Authorization` header)* |
 
 ---
 
