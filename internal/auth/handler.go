@@ -35,18 +35,18 @@ func (h *Handler) RequestAuth(ctx *gin.Context) {
 	clientSecret := ctx.PostForm("client_secret")
 
 	if clientID == "" || clientSecret == "" {
-		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidRequest.Error()})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidRequest.Error()})
 		return
 	}
 
 	if exists := h.repository.Validate(clientID, clientSecret); !exists {
-		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidCredentials.Error()})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ErrInvalidCredentials.Error()})
 		return
 	}
 
-	tok, err := h.service.IssueToken(clientID, 5*time.Minute)
+	tok, err := h.service.IssueToken(clientID, 60*time.Minute)
 	if err != nil {
-		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrOnTokenIssue.Error()})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ErrOnTokenIssue.Error()})
 		return
 	}
 

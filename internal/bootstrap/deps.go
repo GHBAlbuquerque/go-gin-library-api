@@ -23,7 +23,7 @@ func BuildDeps(authConfig AuthConfig) (*auth.Handler, *book.Handler, error) {
 	authSvc := auth.NewService(authConfig.JWTSecret, authConfig.Issuer, authConfig.Audience)
 	bookSvc := book.NewService(store)
 
-	// Create handler
+	// Create handlers
 	authHandler := auth.NewHandler(clientRepo, authSvc)
 	bookHandler := book.NewHandler(bookSvc)
 

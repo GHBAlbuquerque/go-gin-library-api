@@ -7,15 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newRouter(a *auth.Handler, h *book.Handler) (*gin.Engine, error) {
+func newRouter(authHandler *auth.Handler, bookHandler *book.Handler) (*gin.Engine, error) {
 	router := gin.Default()
 
-	router.POST("/auth/token", a.RequestAuth)
-	router.GET("/books", h.FindAll)
-	router.GET("/books/:id", h.GetById)
-	router.POST("/books", h.Create)
-	router.PATCH("/checkout", h.Checkout)
-	router.PATCH("/return", h.Return)
+	router.POST("/auth/token", authHandler.RequestAuth)
+
+	api := router.Group("/api", authHandler.RequireAuth())
+	{
+		api.GET("/books", bookHandler.FindAll)
+		api.GET("/books/:id", bookHandler.GetById)
+		api.POST("/books", bookHandler.Create)
+		api.PATCH("/checkout", bookHandler.Checkout)
+		api.PATCH("/return", bookHandler.Return)
+	}
 
 	return router, nil
 }
