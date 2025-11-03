@@ -8,6 +8,8 @@ Features:
 - REST API for library management (CRUD operations)
 - Local infrastructure with docker compose
 
+//TODO: add authentication and cors on middleware layer
+//TODO: unit testing
 
 ## 🚀 How to run
 

@@ -44,7 +44,7 @@ func (h *Handler) RequestAuth(ctx *gin.Context) {
 		return
 	}
 
-	tok, err := h.service.IssueToken(clientID, time.Second)
+	tok, err := h.service.IssueToken(clientID, 5*time.Minute)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{"error": ErrOnTokenIssue.Error()})
 		return
