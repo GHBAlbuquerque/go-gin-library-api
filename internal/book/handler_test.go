@@ -127,3 +127,120 @@ func TestHandler_FindAll(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_GetById(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name         string
+		svc          *mockSvc
+		path         string
+		wantedStatus int
+	}{
+		{
+			name: "404 when book is not found",
+			svc: &mockSvc{GetByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+				return book.Book{}, errors.New("not found")
+			}},
+			path:         "/books/1",
+			wantedStatus: http.StatusNotFound,
+		},
+		{
+			name: "200 when book is found",
+			svc: &mockSvc{GetByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+				return book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 2}, nil
+			}},
+			path:         "/books/1",
+			wantedStatus: http.StatusOK,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			h := book.NewHandler(testCase.svc)
+			r := gin.New()
+			r.GET("/books/1", h.GetById)
+
+			req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+			rec := httptest.NewRecorder()
+
+			r.ServeHTTP(rec, req)
+
+			if rec.Code != testCase.wantedStatus {
+				t.Fatalf("status=%d; wanted=%d body=%s", rec.Code, testCase.wantedStatus, rec.Body.String())
+			}
+		})
+	}
+
+}
+
+/*
+func TestHander_Create(t *testing.T) {
+	tests := []struct {
+		name         string
+		svc          *mockSvc
+		path         string
+		wantedStatus int
+		body         *bytes.Reader
+	}{
+		{
+			name:         "400 when JSON can't be binded",
+			svc:          &mockSvc{  },
+			path:         "/books",
+			wantedStatus: http.StatusBadRequest,
+			body:         bytes.NewReader([]byte(`{"title":`)),
+		},
+		{
+			name: "204 when book there is a conflict",
+			svc: &mockSvc{CreateFunc: func(ctx context.Context, BookRequest book.BookRequest) (string, error) {
+				//TODO
+			}},
+			path:         "/books",
+			wantedStatus: http.StatusConflict,
+			body:         bodyJSON(t, map[string]any{"title": "Clean Code", "author": "Robert C. Martin"}),
+		},
+		{
+			name: "201 when book is created",
+			svc: &mockSvc{CreateFunc: func(ctx context.Context, BookRequest book.BookRequest) (string, error) {
+				//TODO
+			}},
+			path:         "/books",
+			wantedStatus: http.StatusCreated,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			h := book.NewHandler(testCase.svc)
+			r := gin.New()
+			r.GET("/books/1", h.GetById)
+
+			req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+			rec := httptest.NewRecorder()
+
+			r.ServeHTTP(rec, req)
+
+			if rec.Code != testCase.wantedStatus {
+				t.Fatalf("status=%d; wanted=%d body=%s", rec.Code, testCase.wantedStatus, rec.Body.String())
+			}
+		})
+	}
+}
+
+func TestHandler_Checkout(t *testing.T) {
+	tests := []struct {
+		name         string
+		svc          *mockSvc
+		path         string
+		wantedStatus int
+	}{}
+}
+
+func TestHandler_Return(t *testing.T) {
+	tests := []struct {
+		name         string
+		svc          *mockSvc
+		path         string
+		wantedStatus int
+	}{}
+}*/
