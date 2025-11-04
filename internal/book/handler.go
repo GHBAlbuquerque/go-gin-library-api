@@ -28,7 +28,7 @@ func (h *Handler) FindAll(ctx *gin.Context) {
 
 	filters := BookFilters{Author: ctx.Query("author"), Title: ctx.Query("title")}
 
-	books, err := h.service.FindAll(ctx, filters)
+	books, err := h.service.FindAll(ctx.Request.Context(), filters)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -45,7 +45,7 @@ func (h *Handler) FindAll(ctx *gin.Context) {
 // GetById returns the json version of desired book.
 func (h *Handler) GetById(ctx *gin.Context) {
 	id := ctx.Param("id")
-	book, err := h.service.GetById(ctx, id)
+	book, err := h.service.GetById(ctx.Request.Context(), id)
 
 	if err != nil {
 		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -65,7 +65,7 @@ func (h *Handler) Create(ctx *gin.Context) {
 		return
 	}
 
-	out, err := h.service.Create(ctx, bookRequest)
+	out, err := h.service.Create(ctx.Request.Context(), bookRequest)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
@@ -83,7 +83,7 @@ func (h *Handler) Checkout(ctx *gin.Context) {
 		return
 	}
 
-	book, err := h.service.Checkout(ctx, id)
+	book, err := h.service.Checkout(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -101,7 +101,7 @@ func (h *Handler) Return(ctx *gin.Context) {
 		return
 	}
 
-	book, err := h.service.Return(ctx, id)
+	book, err := h.service.Return(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
