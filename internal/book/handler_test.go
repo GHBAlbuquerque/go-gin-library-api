@@ -103,6 +103,9 @@ func TestHandler_FindAll(t *testing.T) {
 			name: "200 on success (title filter only)",
 			svc: &mockSvc{
 				FindAllFunc: func(ctx context.Context, f book.BookFilters) ([]book.Book, error) {
+					if f.Title == "" {
+						t.Fatalf("Expected %s, got empty string", "Tit")
+					}
 					return []book.Book{{ID: "2", Title: "Title", Author: "Author", Quantity: 2}}, nil
 				},
 			},
@@ -113,6 +116,9 @@ func TestHandler_FindAll(t *testing.T) {
 			name: "200 on success (author filter only)",
 			svc: &mockSvc{
 				FindAllFunc: func(ctx context.Context, f book.BookFilters) ([]book.Book, error) {
+					if f.Author == "" {
+						t.Fatalf("Expected %s, got empty string", "Auth")
+					}
 					return []book.Book{{ID: "3", Title: "Title", Author: "Author", Quantity: 2}}, nil
 				},
 			},
@@ -159,6 +165,9 @@ func TestHandler_GetById(t *testing.T) {
 		{
 			name: "200 when book is found",
 			svc: &mockSvc{GetByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+				if id != "1" {
+					t.Fatalf("expected id=1, got %q", id)
+				}
 				return book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 2}, nil
 			}},
 			path:         "/books/1",
@@ -170,7 +179,7 @@ func TestHandler_GetById(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			h := book.NewHandler(testCase.svc)
 			r := gin.New()
-			r.GET("/books/1", h.GetById)
+			r.GET("/books/:id", h.GetById)
 
 			req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
 			rec := httptest.NewRecorder()
