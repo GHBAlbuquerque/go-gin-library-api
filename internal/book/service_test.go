@@ -315,3 +315,130 @@ func TestService_Create_Error(t *testing.T) {
 		t.Fatalf("Create didn't return error: %q", err)
 	}
 }
+
+// ---------- Checkout ----------
+
+func TestService_Checkout_BookNotExistsError(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return book.Book{}, book.ErrNotFound
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			t.Fatal("Update shouldn't have been called")
+			return nil
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	_, err := svc.Checkout(context.Background(), want.ID)
+	if err == nil {
+		t.Fatalf("Checkout didn't return error: %q", err)
+	}
+	if !errors.Is(err, book.ErrNotFound) {
+		t.Fatalf("Checkout = %#v, want %#v", err.Error(), book.ErrNotFound.Error())
+	}
+}
+
+func TestService_Checkout_BookUnavailableError(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return want, nil
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			if b.ID != want.ID || b.Title != want.Title || b.Author != want.Author {
+				t.Fatalf("Updated book does not correspond to request: %q and %q", b, want)
+			}
+			return book.ErrBookUnavailable
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	_, err := svc.Checkout(context.Background(), want.ID)
+	if err == nil {
+		t.Fatalf("Checkout didn't return error: %q", err)
+	}
+	if !errors.Is(err, book.ErrBookUnavailable) {
+		t.Fatalf("Checkout = %#v, want %#v", err.Error(), book.ErrBookUnavailable.Error())
+	}
+}
+
+func TestService_Checkout_BookUpdateError(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return want, nil
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			if b.ID != want.ID || b.Title != want.Title || b.Author != want.Author {
+				t.Fatalf("Updated book does not correspond to request: %q and %q", b, want)
+			}
+			return errors.New("Error!")
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	_, err := svc.Checkout(context.Background(), want.ID)
+	if err == nil {
+		t.Fatalf("Checkout didn't return error: %q", err)
+	}
+}
+
+func TestService_Checkout_Success(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	updated := false
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return want, nil
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			if b.ID != want.ID || b.Title != want.Title || b.Author != want.Author {
+				t.Fatalf("Updated book does not correspond to request: %q and %q", b, want)
+			}
+			if b.Quantity != want.Quantity-1 {
+				t.Fatalf("expected update with quantity %d, got %d", want.Quantity-1, b.Quantity)
+			}
+			updated = true
+			return nil
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	got, err := svc.Checkout(context.Background(), want.ID)
+	if err != nil {
+		t.Fatalf("Checkout returned error: %q", err)
+	}
+	if got.Quantity != want.Quantity-1 {
+		t.Fatalf("Checkout did not update book quantity correctly. wanted %q, got %q", want.Quantity-1, got.Quantity)
+	}
+	if updated == false {
+		t.Fatal("Update was not called")
+	}
+}
+
+// ---------- Return ----------
+
+func TestService_Return_BookNotExistsError(t *testing.T) {
+
+}
+
+func TestService_Return_BookUpdateError(t *testing.T) {
+
+}
+
+func TestService_Return_Success(t *testing.T) {
+
+}
