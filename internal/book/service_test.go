@@ -432,13 +432,85 @@ func TestService_Checkout_Success(t *testing.T) {
 // ---------- Return ----------
 
 func TestService_Return_BookNotExistsError(t *testing.T) {
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return book.Book{}, book.ErrNotFound
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			t.Fatal("Update shouldn't have been called when book doesn't exist")
+			return nil
+		},
+	}
 
+	svc := book.NewService(storeMock)
+	_, err := svc.Return(context.Background(), "1")
+	if err == nil {
+		t.Fatalf("Return didn't return error: %q", err)
+	}
+	if !errors.Is(err, book.ErrNotFound) {
+		t.Fatalf("Return = %v, want error wrapping %v", err, book.ErrNotFound)
+	}
 }
 
 func TestService_Return_BookUpdateError(t *testing.T) {
+	baseErr := errors.New("update failed")
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != want.ID {
+				t.Fatalf("Expected ID %q, got %q", want.ID, id)
+			}
+			return want, nil
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			if b.Quantity != want.Quantity+1 {
+				t.Fatalf("expected quantity %d, got %d", want.Quantity+1, b.Quantity)
+			}
+			return baseErr
+		},
+	}
 
+	svc := book.NewService(storeMock)
+	_, err := svc.Return(context.Background(), want.ID)
+	if err == nil {
+		t.Fatalf("Return didn't return error: %q", err)
+	}
+	if !errors.Is(err, baseErr) {
+		t.Fatalf("Return error %v does not wrap %v", err, baseErr)
+	}
 }
 
 func TestService_Return_Success(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	updated := false
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != want.ID {
+				t.Fatalf("Expected ID %q, got %q", want.ID, id)
+			}
+			return want, nil
+		},
+		UpdateFunc: func(ctx context.Context, b book.Book) error {
+			updated = true
+			if b.Quantity != want.Quantity+1 {
+				t.Fatalf("expected quantity %d, got %d", want.Quantity+1, b.Quantity)
+			}
+			return nil
+		},
+	}
 
+	svc := book.NewService(storeMock)
+	got, err := svc.Return(context.Background(), want.ID)
+	if err != nil {
+		t.Fatalf("Return returned error: %v", err)
+	}
+	if got.Quantity != want.Quantity+1 {
+		t.Fatalf("Return quantity = %d, want %d", got.Quantity, want.Quantity+1)
+	}
+	if !updated {
+		t.Fatal("Return did not call Update")
+	}
 }
