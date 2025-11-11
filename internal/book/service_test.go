@@ -267,3 +267,51 @@ func TestService_GetById_Error(t *testing.T) {
 		t.Fatalf("GetById = %#v, want %#v", book.ErrNotFound.Error(), err.Error())
 	}
 }
+
+// ---------- Create ----------
+func TestService_Create_Success(t *testing.T) {
+	req := book.BookRequest{Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		CreateFunc: func(ctx context.Context, b book.Book) (string, error) {
+			if b.Title != req.Title || b.Author != req.Author || b.Quantity != req.Quantity {
+				t.Fatalf("Saved book does not correspond to request: %q", b)
+			}
+			if b.ID == "" {
+				t.Fatal("expected service to assign iD before calling the store")
+			}
+
+			return b.ID, nil
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	got, err := svc.Create(context.Background(), req)
+	if err != nil {
+		t.Fatalf("Create returned error: %q", err)
+	}
+	if len(got) < 36 {
+		t.Fatalf("Generated ID is not UUID: %q", got)
+	}
+}
+
+func TestService_Create_Error(t *testing.T) {
+	req := book.BookRequest{Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		CreateFunc: func(ctx context.Context, b book.Book) (string, error) {
+			if b.Title != req.Title || b.Author != req.Author || b.Quantity != req.Quantity {
+				t.Fatalf("Saved book does not correspond to request: %q", b)
+			}
+			if b.ID == "" {
+				t.Fatal("expected service to assign iD before calling the store")
+			}
+
+			return "", errors.New("Error")
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	_, err := svc.Create(context.Background(), req)
+	if err == nil {
+		t.Fatalf("Create didn't return error: %q", err)
+	}
+}
