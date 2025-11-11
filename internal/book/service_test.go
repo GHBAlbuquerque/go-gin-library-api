@@ -64,7 +64,7 @@ func (s *mockStore) FindByAuthor(ctx context.Context, author string) ([]book.Boo
 var _ book.Store = (*mockStore)(nil)
 
 // ---------- Tests ----------
-
+// ---------- FindAll ----------
 func TestService_FindAll_TitleSuccess(t *testing.T) {
 	want := []book.Book{{ID: "1", Title: "Title", Author: "Author", Quantity: 1}}
 	storeMock := &mockStore{
@@ -222,5 +222,48 @@ func TestService_FindAll_Error(t *testing.T) {
 	_, err := svc.FindAll(context.Background(), book.BookFilters{})
 	if err == nil {
 		t.Fatalf("FindAll didn't return error: %q", err)
+	}
+}
+
+// ---------- GetById ----------
+func TestService_GetById_Success(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return want, nil
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	got, err := svc.GetById(context.Background(), want.ID)
+	if err != nil {
+		t.Fatalf("GetById returned error: %q", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("GetById = %#v, want %#v", got, want)
+	}
+}
+
+func TestService_GetById_Error(t *testing.T) {
+	want := book.Book{ID: "1", Title: "Title", Author: "Author", Quantity: 1}
+	storeMock := &mockStore{
+		FindByIdFunc: func(ctx context.Context, id string) (book.Book, error) {
+			if id != "1" {
+				t.Fatalf("Expected ID '1', got %q", id)
+			}
+			return book.Book{}, book.ErrNotFound
+		},
+	}
+
+	svc := book.NewService(storeMock)
+	_, err := svc.GetById(context.Background(), want.ID)
+	if err == nil {
+		t.Fatalf("GetById didn't return error: %q", err)
+	}
+	if !errors.Is(err, book.ErrNotFound) {
+		t.Fatalf("GetById = %#v, want %#v", book.ErrNotFound.Error(), err.Error())
 	}
 }
